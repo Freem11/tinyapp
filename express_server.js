@@ -33,13 +33,29 @@ app.post("/urls", (req, res) => {
       longURL = "http://" + longURL
   }
   urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);
+  res.redirect(`/urls`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]
   res.redirect("/urls");
+});
+
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  // console.log(shortURL)
+  res.redirect("/urls/"+shortURL);
+});
+
+app.post("/edit", (req, res) => {
+  let editURL = req.body.editURL;
+  const shortURL = req.body.shURL
+  if(!editURL.includes("http://")){
+      editURL = "http://" + editURL
+  }
+   urlDatabase[shortURL] = editURL
+   res.redirect("/urls");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
