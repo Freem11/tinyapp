@@ -28,8 +28,18 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body["longURL"];
+  let longURL = req.body["longURL"]
+  if(!longURL.includes("http://")){
+      longURL = "http://" + longURL
+  }
+  urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL]
+  res.redirect("/urls");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
