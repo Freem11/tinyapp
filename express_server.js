@@ -13,6 +13,20 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
+
 app.get("/register", (req, res) => {
   const templateVars = { urls: urlDatabase, username: req.cookies["username"]} ;
   res.render("urls_register", templateVars);
@@ -43,6 +57,35 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls`);
 });
 
+app.post("/register", (req, res) => {
+
+  checkEmail = req.body.email
+  checkPswd = req.body.password
+  
+  if (emailValidate(checkEmail)) {
+
+    if(checkEmail === "" ||  checkPswd == ""){
+      res.status(400).send("Please fill out BOTH required fields")
+      return
+    }
+  
+    const userID = generateRandomString();
+    
+    users[userID] = {
+            ["id"]: userID,
+            ["email"]: req.body.email,
+            ["password"]: req.body.password,
+    }
+
+    const userEmail = req.body.email
+    res.cookie("username", userEmail)
+    const templateVars = { username: req.cookies["username"]};
+    res.redirect(`/urls`);
+} else {
+  res.status(400).send("Sorry that Email is already registered")
+}
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]
@@ -56,6 +99,12 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  // for (let userT in users){
+  //   if (users[userT]['email'] === req.body.email) {
+  //     console.log("Sorry that email is already in use")
+  //     return
+  //   }
+
   const UserID = req.body.username;
    res.cookie("username", UserID)
   res.redirect("/urls");
@@ -74,7 +123,7 @@ app.post("/edit", (req, res) => {
 app.post("/logout", (req, res) => {
   const templateVars = {username: req.cookies["username"]};
   res.clearCookie("username", templateVars.username)
-  res.redirect("/urls");
+  res.redirect("/register");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -94,6 +143,14 @@ app.listen(PORT, () => {
 });
 
 
+function emailValidate(attEmail) {
+  for (let userT in users){
+    if (users[userT]['email'] === attEmail) {
+      return false
+    }
+    return true
+}
+}
 
 
 function generateRandomString() {
