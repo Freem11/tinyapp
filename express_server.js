@@ -32,6 +32,11 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"]} ;
+  res.render("urls_login", templateVars);
+});
+
 app.get("/urls/new", (req, res) => {
   const templateVars = { username: req.cookies["username"]};
   res.render("urls_new", templateVars);
@@ -62,12 +67,18 @@ app.post("/register", (req, res) => {
   checkEmail = req.body.email
   checkPswd = req.body.password
   
-  if (emailValidate(checkEmail)) {
+  if (checkBlanks(checkEmail, checkPswd) === "yes") {
+    
+    res.status(400).send("Please fill out BOTH required fields")
+    return
+  }
 
-    if(checkEmail === "" ||  checkPswd == ""){
-      res.status(400).send("Please fill out BOTH required fields")
-      return
-    }
+  if (emailValidate(checkEmail, users)) {
+    res.status(400).send("Sorry that Email is already registered")
+    return
+  }
+
+  
   
     const userID = generateRandomString();
     
@@ -81,12 +92,11 @@ app.post("/register", (req, res) => {
     res.cookie("username", userEmail)
     const templateVars = { username: req.cookies["username"]};
     res.redirect(`/urls`);
-} else {
-  res.status(400).send("Sorry that Email is already registered")
-}
+
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]
   res.redirect("/urls");
@@ -99,15 +109,23 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // for (let userT in users){
-  //   if (users[userT]['email'] === req.body.email) {
-  //     console.log("Sorry that email is already in use")
-  //     return
-  //   }
 
-  const UserID = req.body.username;
+  checkEmail = req.body.email
+  checkPswd = req.body.password
+
+  if (checkBlanks(checkEmail, checkPswd) === "yes") {
+    console.log("yo")
+    res.status(400).send("Please fill out BOTH required fields")
+    return
+  }
+  if (loginlValidate(checkEmail, checkPswd)) {
+      
+  const UserID = req.body.email;
    res.cookie("username", UserID)
   res.redirect("/urls");
+  } else {
+    res.status(400).send("Sorry your login credentials didnt match any on file")
+  }
 });
 
 app.post("/edit", (req, res) => {
@@ -123,7 +141,7 @@ app.post("/edit", (req, res) => {
 app.post("/logout", (req, res) => {
   const templateVars = {username: req.cookies["username"]};
   res.clearCookie("username", templateVars.username)
-  res.redirect("/register");
+  res.redirect("/login");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -143,13 +161,34 @@ app.listen(PORT, () => {
 });
 
 
-function emailValidate(attEmail) {
-  for (let userT in users){
-    if (users[userT]['email'] === attEmail) {
-      return false
-    }
+function emailValidate(attEmail, obj) {
+ 
+  for (let num in obj){
+
+    if (obj[num]['email'] === attEmail) {
+
     return true
+    }
+   
 }
+return false
+}
+
+function loginlValidate(Email, Password) {
+  for (let userT in users){
+    if ((users[userT]['email'] === Email) && (users[userT]['password'] === Password)) {
+      return true
+    }  
+}
+console.log("Hi")
+return false
+}
+
+function checkBlanks(Email, Password) {
+  if(Email === "" ||  Password == ""){
+    return "yes"
+  }
+    return "no"
 }
 
 
