@@ -30,7 +30,7 @@
             <td><form method="POST" action="/urls/<%=url%>">
               <button type="submit" class="btn btn-outline-info">Edit</button>
             </form></td>
-            <td><form method="POST" action="/urls/<%=url%>/delete/">
+            <td><form method="POST" action="/urls/<%=url%>/delete/?_method=DELETE">
               <button type="submit" class="btn btn-outline-danger">Delete</button>
           </tr>
         <% } %>
