@@ -1,4 +1,3 @@
-
 function generateRandomString() {
   let result = "";
   let characters =
@@ -9,22 +8,22 @@ function generateRandomString() {
   return result;
 }
 
-function emailValidate(attEmail, obj) {
-  for (let num in obj) {
-    if (obj[num]["email"] === attEmail) {
+function emailValidate(attemptEmail, usersDatabase) {
+  for (let shortURl in usersDatabase) {
+    if (usersDatabase[shortURl]["email"] === attemptEmail) {
       return true;
     }
   }
   return false;
 }
 
-function loginValidate(Email, Password, obj) {
-  for (let userT in obj) {
+function loginValidate(Email, Password, usersDatabase) {
+  for (let shortURl in usersDatabase) {
     if (
-      obj[userT]["email"] === Email &&
-      obj[userT]["password"] === Password
+      usersDatabase[shortURl]["email"] === Email &&
+      usersDatabase[shortURl]["password"] === Password
     ) {
-      return obj[userT]["id"];
+      return usersDatabase[shortURl]["id"];
     }
   }
   return false;
@@ -37,18 +36,22 @@ function checkBlanks(Email, Password) {
   return "no";
 }
 
-function urlsForUser(id , dbObj) {
-
-  let obj = {};
- for (let num in dbObj) {
-
-   if (dbObj[num]["userID"] === id) {
-
-     obj[num] = dbObj[num]
- 
-   }
- }
-   return obj
+// Pulls out the list of URLs for the logged in User
+function urlsForUser(userId, URLDatabase) {
+  let URLs = {};
+  for (let indexnumber in URLDatabase) {
+    if (URLDatabase[indexnumber]["userID"] === userId) {
+      URLs[indexnumber] = URLDatabase[indexnumber];
+    }
+  }
+  console.log(URLs);
+  return URLs;
 }
 
-module.exports = { emailValidate, loginValidate, checkBlanks, generateRandomString, urlsForUser}
+module.exports = {
+  emailValidate,
+  loginValidate,
+  checkBlanks,
+  generateRandomString,
+  urlsForUser,
+};
