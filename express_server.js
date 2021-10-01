@@ -48,6 +48,17 @@ const users = {
   },
 };
 
+app.get("/", (req, res) => {
+  const id = req.session.user_Id;
+
+  if (id) {
+    res.redirect(`/urls`);
+    return;
+  }
+
+  res.redirect(`/login`);
+});
+
 //-------------------------------------------------------------------------
 
 app.get("/register", (req, res) => {
@@ -284,25 +295,25 @@ app.get("/urls/:shortURL", (req, res) => {
 
   let visitCount = 0;
   let uniqueVists = 0;
-  let visitLog = {}
+  let visitLog = {};
 
   for (let sUrl in visitsDb) {
-    if (sUrl === shortURL) { 
-      visitLog = visitsDb[sUrl]
+    if (sUrl === shortURL) {
+      visitLog = visitsDb[sUrl];
       for (let visitor in visitsDb[sUrl]) {
-      visitCount += visitsDb[sUrl][visitor].length;
-      uniqueVists += 1;
+        visitCount += visitsDb[sUrl][visitor].length;
+        uniqueVists += 1;
       }
     }
   }
 
-  const templateVars = { 
-    user: user, 
-    shortURL: shortURL, 
-    longURL: longURL, 
-    timesVisited: visitCount, 
-    uniqueV: uniqueVists, 
-    roster: visitLog 
+  const templateVars = {
+    user: user,
+    shortURL: shortURL,
+    longURL: longURL,
+    timesVisited: visitCount,
+    uniqueV: uniqueVists,
+    roster: visitLog,
   };
 
   res.render("urls_show", templateVars);
@@ -310,7 +321,6 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //-------------------------------------------------------------------------
 
-// this one !!!!!
 app.get("/u/:shortURL", (req, res) => {
   const shURL = req.params.shortURL;
 
@@ -322,21 +332,19 @@ app.get("/u/:shortURL", (req, res) => {
     id = userID;
   }
 
-  let stamp = moment(Date.now()).format('MMM Do, YYYY')
-
+  let stamp = moment(Date.now()).format("MMM Do, YYYY");
 
   if (visitsDb[shURL]) {
     if (visitsDb[shURL][id]) {
       visitsDb[shURL][id].push(stamp);
     } else {
-      visitsDb[shURL][id] = [stamp]
+      visitsDb[shURL][id] = [stamp];
     }
   } else {
     visitsDb[shURL] = {
       [id]: [stamp],
     };
   }
-
 
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
