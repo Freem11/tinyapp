@@ -44,7 +44,6 @@ function urlsForUser(userId, URLDatabase) {
       URLs[indexnumber] = URLDatabase[indexnumber];
     }
   }
-  console.log(URLs);
   return URLs;
 }
 

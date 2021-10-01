@@ -22,7 +22,30 @@
           </div>
         </form>
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-        
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <p class="card-text">No.Visits:<%= timesVisited %></p>
+          </div>
+          <div class="col-md-6">
+            <p class="card-text">No.Unique Visits:<%= uniqueV %></p>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Date(s) Visited</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for(let userId in roster) { %>
+              <tr>
+                <td></a><%= userId %></td>
+                <td><%= roster[userId].join(" | ") %></td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
