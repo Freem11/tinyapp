@@ -2,13 +2,14 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const helpers = require("./helpers");
-const methodOverride = require('method-override')
+const methodOverride = require("method-override");
+const moment = require("moment");
 
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 app.use(express.urlencoded({ extended: true }));
 
-app.use(methodOverride('_method'))
+app.use(methodOverride("_method"));
 
 app.use(
   cookieSession({
@@ -21,17 +22,7 @@ app.use(
 
 app.set("view engine", "ejs");
 
-// const Visits = {
-//   b2xVn2: {
-//     user/visitor name: [timeStamps],
-
-//   },
-
-
-
-
-
-
+const visitsDb = {};
 
 const urlDatabase = {
   b2xVn2: {
@@ -107,7 +98,6 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   const id = req.session.user_Id;
 
-  console.log(id);
   if (!id) {
     res.status(403).send("You are not logged in");
     return;
@@ -177,7 +167,6 @@ app.post("/register", (req, res) => {
 //-------------------------------------------------------------------------
 
 app.delete("/urls/:shortURL/delete", (req, res) => {
-
   const id = req.session.user_Id;
 
   if (!id) {
@@ -285,8 +274,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = users[id];
 
   const shortURL = req.params.shortURL;
-  console.log(shortURL);
-  console.log(urlDatabase);
 
   const longURL = urlDatabase[shortURL].longURL;
 
@@ -295,15 +282,62 @@ app.get("/urls/:shortURL", (req, res) => {
     userID: id,
   };
 
-  const templateVars = { user: user, shortURL: shortURL, longURL: longURL };
+  let visitCount = 0;
+  let uniqueVists = 0;
+  let visitLog = {}
+
+  for (let sUrl in visitsDb) {
+    if (sUrl === shortURL) { 
+      visitLog = visitsDb[sUrl]
+      for (let visitor in visitsDb[sUrl]) {
+      visitCount += visitsDb[sUrl][visitor].length;
+      uniqueVists += 1;
+      }
+    }
+  }
+
+  const templateVars = { 
+    user: user, 
+    shortURL: shortURL, 
+    longURL: longURL, 
+    timesVisited: visitCount, 
+    uniqueV: uniqueVists, 
+    roster: visitLog 
+  };
+
   res.render("urls_show", templateVars);
 });
 
 //-------------------------------------------------------------------------
 
-
-// thsi one !!!!!
+// this one !!!!!
 app.get("/u/:shortURL", (req, res) => {
+  const shURL = req.params.shortURL;
+
+  let id = req.session.user_Id;
+
+  if (!id) {
+    const userID = helpers.generateRandomString();
+    req.session.visitor_Id = userID;
+    id = userID;
+  }
+
+  let stamp = moment(Date.now()).format('MMM Do, YYYY')
+
+
+  if (visitsDb[shURL]) {
+    if (visitsDb[shURL][id]) {
+      visitsDb[shURL][id].push(stamp);
+    } else {
+      visitsDb[shURL][id] = [stamp]
+    }
+  } else {
+    visitsDb[shURL] = {
+      [id]: [stamp],
+    };
+  }
+
+
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
 
