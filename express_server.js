@@ -193,6 +193,7 @@ app.delete("/urls/:shortURL/delete", (req, res) => {
 //-------------------------------------------------------------------------
 
 app.post("/urls/:id", (req, res) => {
+
   const id = req.session.user_Id;
 
   if (!id) {
@@ -275,19 +276,32 @@ app.post("/logout", (req, res) => {
 //-------------------------------------------------------------------------
 
 app.get("/urls/:shortURL", (req, res) => {
+  
   const id = req.session.user_Id;
+  const user = users[id];
+  const shortURL = req.params.shortURL;
+  
+  if (!urlDatabase[shortURL]) {
+    res.status(404).send("Your URL cannot be found");
+    return;
+  }
+
+  const longURL = urlDatabase[shortURL].longURL;
+  const owner = urlDatabase[shortURL]['userID']
 
   if (!id) {
     res.status(403).send("You are not logged in");
     return;
   }
 
-  const user = users[id];
+  if (id !== owner) {
+    res.status(403).send("You do not have the required access to view this page");
+    return;
+  }
 
-  const shortURL = req.params.shortURL;
+ 
 
-  const longURL = urlDatabase[shortURL].longURL;
-
+  
   urlDatabase[shortURL] = {
     longURL: longURL,
     userID: id,
@@ -322,8 +336,16 @@ app.get("/urls/:shortURL", (req, res) => {
 //-------------------------------------------------------------------------
 
 app.get("/u/:shortURL", (req, res) => {
-  const shURL = req.params.shortURL;
+ 
+  const shortURL = req.params.shortURL;
+  
 
+  if (!urlDatabase[shortURL]) {
+    res.status(404).send("Your URL cannot be found");
+    return;
+  }
+
+  const longURL = urlDatabase[shortURL].longURL;
   let id = req.session.user_Id;
 
   if (!id) {
@@ -334,21 +356,19 @@ app.get("/u/:shortURL", (req, res) => {
 
   let stamp = moment(Date.now()).format("MMM Do, YYYY");
 
-  if (visitsDb[shURL]) {
-    if (visitsDb[shURL][id]) {
-      visitsDb[shURL][id].push(stamp);
+  if (visitsDb[shortURL]) {
+    if (visitsDb[shortURL][id]) {
+      visitsDb[shortURL][id].push(stamp);
     } else {
-      visitsDb[shURL][id] = [stamp];
+      visitsDb[shortURL][id] = [stamp];
     }
   } else {
-    visitsDb[shURL] = {
+    visitsDb[shortURL] = {
       [id]: [stamp],
     };
   }
 
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
-
+ 
   res.redirect(longURL);
 });
 
