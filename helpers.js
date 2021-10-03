@@ -8,6 +8,7 @@ function generateRandomString() {
   return result;
 }
 
+// At registration, checks to see if the email is already in the database
 function emailValidate(attemptEmail, usersDatabase) {
   for (let shortURl in usersDatabase) {
     if (usersDatabase[shortURl]["email"] === attemptEmail) {
@@ -17,6 +18,7 @@ function emailValidate(attemptEmail, usersDatabase) {
   return false;
 }
 
+//At login attempt, valaidates the supplied email and password against database records
 function loginValidate(Email, Password, usersDatabase) {
   for (let shortURl in usersDatabase) {
     if (
@@ -29,6 +31,7 @@ function loginValidate(Email, Password, usersDatabase) {
   return false;
 }
 
+//Verifies that an email and password have been submitted
 function checkBlanks(Email, Password) {
   if (Email === "" || Password == "") {
     return "yes";

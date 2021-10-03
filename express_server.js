@@ -281,6 +281,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = users[id];
   const shortURL = req.params.shortURL;
   
+
   if (!urlDatabase[shortURL]) {
     res.status(404).send("Your URL cannot be found");
     return;
@@ -298,9 +299,6 @@ app.get("/urls/:shortURL", (req, res) => {
     res.status(403).send("You do not have the required access to view this page");
     return;
   }
-
- 
-
   
   urlDatabase[shortURL] = {
     longURL: longURL,
@@ -311,6 +309,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let uniqueVists = 0;
   let visitLog = {};
 
+  //Calculates the analytics to dispaly on page (total visits, unique visits, visits history for the requested URL)
   for (let sUrl in visitsDb) {
     if (sUrl === shortURL) {
       visitLog = visitsDb[sUrl];
@@ -348,6 +347,7 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[shortURL].longURL;
   let id = req.session.user_Id;
 
+  //checks if the visitor is an exisiting user, if not generates a visitor ID
   if (!id) {
     const userID = helpers.generateRandomString();
     req.session.visitor_Id = userID;
@@ -356,6 +356,8 @@ app.get("/u/:shortURL", (req, res) => {
 
   let stamp = moment(Date.now()).format("MMM Do, YYYY");
 
+
+  // Logs a record (user/visitor ID and timestamp of visit) to the visits database for analytic purposes
   if (visitsDb[shortURL]) {
     if (visitsDb[shortURL][id]) {
       visitsDb[shortURL][id].push(stamp);
