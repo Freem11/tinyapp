@@ -134,8 +134,9 @@ app.post("/urls", (req, res) => {
 
   const shortURL = helpers.generateRandomString();
   let longURL = req.body["longURL"];
-  if (!longURL.includes("http://")) {
-    longURL = "http://" + longURL;
+
+  if (!longURL.includes("http://") || !longURL.includes("https://")) {
+    longURL = "https://" + longURL;
   }
 
   urlDatabase[shortURL] = {
@@ -255,9 +256,15 @@ app.put("/edit", (req, res) => {
 
   let editURL = req.body.editURL;
   const shortURL = req.body.shURL;
+  const owner = urlDatabase[shortURL]['userID']
 
-  if (!editURL.includes("http://")) {
-    editURL = "http://" + editURL;
+  if (owner !== id){
+    res.status(403).send("You do not have the required access to view this page");
+    return
+  }
+
+  if (!editURL.includes("http://") || !editURL.includes("https://")) {
+    editURL = "https://" + editURL;
   }
 
   urlDatabase[shortURL].longURL = editURL;
@@ -313,8 +320,9 @@ app.get("/urls/:shortURL", (req, res) => {
   for (let sUrl in visitsDb) {
     if (sUrl === shortURL) {
       visitLog = visitsDb[sUrl];
-      for (let visitor in visitsDb[sUrl]) {
-        visitCount += visitsDb[sUrl][visitor].length;
+      
+      for (let visitor in visitLog) {
+        visitCount += visitLog[visitor].length;
         uniqueVists += 1;
       }
     }
@@ -347,7 +355,7 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[shortURL].longURL;
   let id = req.session.user_Id;
 
-  //checks if the visitor is an exisiting user, if not generates a visitor ID
+ 
   if (!id) {
     const userID = helpers.generateRandomString();
     req.session.visitor_Id = userID;
